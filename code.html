@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاكي مباريات كرة القدم</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- شاشة اختيار الفرق -->
+        <div id="setup-screen" class="screen active">
+            <h1>محاكي مباريات كرة القدم</h1>
+            <div class="selection-container">
+                <div class="team-selector">
+                    <label for="team1-select">اختر الفريق الأول</label>
+                    <select id="team1-select"></select>
+                </div>
+                <div class="vs">VS</div>
+                <div class="team-selector">
+                    <label for="team2-select">اختر الفريق الثاني</label>
+                    <select id="team2-select"></select>
+                </div>
+            </div>
+            <button id="start-match-btn">بدء المباراة</button>
+            <p id="error-message" class="error"></p>
+        </div>
+
+        <!-- شاشة المباراة -->
+        <div id="match-screen" class="screen">
+            <div class="scoreboard">
+                <div class="team-info" id="team1-info">
+                    <img id="team1-logo" src="" alt="Team 1 Logo">
+                    <span id="team1-name">الفريق الأول</span>
+                </div>
+                <div class="score" id="score">0 - 0</div>
+                <div class="team-info" id="team2-info">
+                    <img id="team2-logo" src="" alt="Team 2 Logo">
+                    <span id="team2-name">الفريق الثاني</span>
+                </div>
+            </div>
+
+            <div class="stadium">
+                <div class="pitch">
+                    <div class="center-circle"></div>
+                    <div class="center-line"></div>
+                    <div class="penalty-area left"></div>
+                    <div class="penalty-area right"></div>
+                    <div id="match-timer">0'</div>
+                    <div id="match-events">
+                        <!-- الأحداث ستظهر هنا -->
+                    </div>
+                </div>
+            </div>
+            <button id="play-again-btn" style="display: none;">العب مرة أخرى</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
