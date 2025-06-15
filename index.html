@@ -3,44 +3,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محاكي مباريات كرة القدم</title>
-    <link rel="stylesheet" href="style.css">
+    <title>محاكي مباريات كرة القدم الاحترافي</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================== */
+        /*      CSS Styles    */
+        /* ================== */
+        :root {
+            --bg-gradient: radial-gradient(circle, #2c3e50, #1a252f);
+            --panel-bg: rgba(22, 33, 62, 0.7);
+            --accent-color: #e94560;
+            --highlight-color: #00f2fe;
+            --text-color: #ffffff;
+            --pitch-green-1: #3a7d44;
+            --pitch-green-2: #4a9d56;
+            --pitch-lines: rgba(255, 255, 255, 0.7);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        #game-container {
+            width: 95%;
+            max-width: 1000px;
+            background: var(--panel-bg);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s ease;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-weight: 900;
+            font-size: 2.5em;
+            color: var(--highlight-color);
+            text-shadow: 0 0 10px var(--highlight-color), 0 0 20px var(--accent-color);
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--accent-color), #ff7b54);
+            color: var(--text-color);
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.2em;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(233, 69, 96, 0.6);
+        }
+        
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* --- شاشة اختيار الفرق --- */
+        .selection-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            margin: 30px 0;
+            gap: 20px;
+        }
+
+        .team-selector {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .team-selector label {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: block;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            border: 1px solid var(--highlight-color);
+            background-color: #1a252f;
+            color: var(--text-color);
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .vs {
+            font-size: 4em;
+            font-weight: 900;
+            color: var(--accent-color);
+            text-shadow: 0 0 15px var(--accent-color);
+        }
+
+        .error {
+            color: #ffc107;
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+
+        /* --- شاشة المباراة --- */
+        .match-header {
+            width: 100%;
+            position: relative;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            position: relative;
+            z-index: 10;
+        }
+
+        .team-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 40%;
+            font-weight: 700;
+        }
+
+        .team-info img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            padding: 5px;
+        }
+        #team1-info { justify-content: flex-start; }
+        #team2-info { justify-content: flex-end; text-align: left; }
+
+        .score-time-container {
+            text-align: center;
+        }
+
+        #score {
+            font-size: 3.5em;
+            font-weight: 900;
+        }
+        #match-timer {
+            background-color: var(--accent-color);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .stadium {
+            width: 100%;
+            height: 450px;
+            border: 3px solid var(--pitch-lines);
+            border-radius: 10px;
+            background: repeating-linear-gradient(to bottom, var(--pitch-green-1), var(--pitch-green-1) 50px, var(--pitch-green-2) 50px, var(--pitch-green-2) 100px);
+            padding: 10px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pitch { position: relative; width: 100%; height: 100%; }
+        .center-line { position: absolute; top: 0; left: 50%; width: 3px; height: 100%; background: var(--pitch-lines); }
+        .center-circle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120px; height: 120px; border: 3px solid var(--pitch-lines); border-radius: 50%; }
+
+        #match-events {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 180px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column-reverse;
+            font-size: 1em;
+        }
+        #match-events p {
+            margin: 3px 0;
+            padding: 6px 10px;
+            border-radius: 5px;
+            animation: fadeIn 0.5s;
+            background: rgba(0,0,0,0.5);
+            border-left: 3px solid var(--highlight-color);
+        }
+        .event-goal { font-weight: bold; color: #ffdd59; border-left-color: #ffdd59;}
+        .event-card-yellow { color: #f1c40f; border-left-color: #f1c40f;}
+        .event-card-red { font-weight: bold; color: #e74c3c; border-left-color: #e74c3c;}
+        .event-info { color: #95a5a6; font-style: italic; border-left-color: #95a5a6;}
+
+        /* نافذة الإحصائيات */
+        #stats-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+        }
+        .modal-content h2 { color: var(--highlight-color); font-size: 2em; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 10px 20px;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        .stats-grid .stat-label { font-weight: bold; color: #bdc3c7; }
+        .stats-grid .team1-stat { text-align: right; }
+        .stats-grid .team2-stat { text-align: left; }
+    </style>
 </head>
 <body>
 
+    <!-- ================== -->
+    <!--     HTML Body      -->
+    <!-- ================== -->
     <div id="game-container">
         <!-- شاشة اختيار الفرق -->
         <div id="setup-screen" class="screen active">
-            <h1>محاكي مباريات كرة القدم</h1>
+            <h1>محاكي كرة القدم الاحترافي</h1>
             <div class="selection-container">
                 <div class="team-selector">
-                    <label for="team1-select">اختر الفريق الأول</label>
+                    <label for="team1-select">الفريق المستضيف (1)</label>
                     <select id="team1-select"></select>
                 </div>
                 <div class="vs">VS</div>
                 <div class="team-selector">
-                    <label for="team2-select">اختر الفريق الثاني</label>
+                    <label for="team2-select">الفريق الضيف (2)</label>
                     <select id="team2-select"></select>
                 </div>
             </div>
-            <button id="start-match-btn">بدء المباراة</button>
+            <button id="start-match-btn">🔥 بدء المباراة 🔥</button>
             <p id="error-message" class="error"></p>
         </div>
 
         <!-- شاشة المباراة -->
         <div id="match-screen" class="screen">
-            <div class="scoreboard">
-                <div class="team-info" id="team1-info">
-                    <img id="team1-logo" src="" alt="Team 1 Logo">
-                    <span id="team1-name">الفريق الأول</span>
-                </div>
-                <div class="score" id="score">0 - 0</div>
-                <div class="team-info" id="team2-info">
-                    <img id="team2-logo" src="" alt="Team 2 Logo">
-                    <span id="team2-name">الفريق الثاني</span>
+            <div class="match-header">
+                <div class="scoreboard">
+                    <div class="team-info" id="team1-info">
+                        <img id="team1-logo" src="" alt="Team 1 Logo">
+                        <span id="team1-name"></span>
+                    </div>
+                    <div class="score-time-container">
+                        <div id="score">0 - 0</div>
+                        <div id="match-timer">0'</div>
+                    </div>
+                    <div class="team-info" id="team2-info">
+                        <span id="team2-name"></span>
+                        <img id="team2-logo" src="" alt="Team 2 Logo">
+                    </div>
                 </div>
             </div>
 
@@ -48,18 +330,363 @@
                 <div class="pitch">
                     <div class="center-circle"></div>
                     <div class="center-line"></div>
-                    <div class="penalty-area left"></div>
-                    <div class="penalty-area right"></div>
-                    <div id="match-timer">0'</div>
-                    <div id="match-events">
-                        <!-- الأحداث ستظهر هنا -->
-                    </div>
                 </div>
+                <div id="match-events"></div>
             </div>
             <button id="play-again-btn" style="display: none;">العب مرة أخرى</button>
         </div>
     </div>
+    
+    <!-- نافذة الإحصائيات -->
+    <div id="stats-modal">
+        <div class="modal-content">
+            <h2>إحصائيات المباراة النهائية</h2>
+            <div id="final-result"></div>
+            <div class="stats-grid">
+                <div id="stats-team1-name" class="team1-stat" style="grid-column: 1;"></div>
+                <div></div>
+                <div id="stats-team2-name" class="team2-stat" style="grid-column: 3;"></div>
 
-    <script src="script.js"></script>
+                <div id="stats-possession1" class="team1-stat stat-value"></div>
+                <div class="stat-label">الاستحواذ</div>
+                <div id="stats-possession2" class="team2-stat stat-value"></div>
+
+                <div id="stats-goals1" class="team1-stat stat-value"></div>
+                <div class="stat-label">الأهداف</div>
+                <div id="stats-goals2" class="team2-stat stat-value"></div>
+
+                <div id="stats-shots1" class="team1-stat stat-value"></div>
+                <div class="stat-label">التسديدات</div>
+                <div id="stats-shots2" class="team2-stat stat-value"></div>
+
+                <div id="stats-fouls1" class="team1-stat stat-value"></div>
+                <div class="stat-label">الأخطاء</div>
+                <div id="stats-fouls2" class="team2-stat stat-value"></div>
+
+                <div id="stats-yellow1" class="team1-stat stat-value"></div>
+                <div class="stat-label">بطاقات صفراء</div>
+                <div id="stats-yellow2" class="team2-stat stat-value"></div>
+                
+                <div id="stats-red1" class="team1-stat stat-value"></div>
+                <div class="stat-label">بطاقات حمراء</div>
+                <div id="stats-red2" class="team2-stat stat-value"></div>
+            </div>
+            <button id="close-stats-btn">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- مؤثرات صوتية -->
+    <audio id="goal-sound" src="https://www.myinstants.com/media/sounds/goal-sound.mp3" preload="auto"></audio>
+    <audio id="whistle-sound" src="https://www.myinstants.com/media/sounds/referee-whistle-01.mp3" preload="auto"></audio>
+    
+    <script>
+    /* ================== */
+    /*    JavaScript      */
+    /* ================== */
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- قواعد البيانات ---
+        const teams = [
+            // أوروبا
+            { name: "ريال مدريد", continent: "Europe", strength: 95, logo: "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/1200px-Real_Madrid_CF.svg.png" },
+            { name: "مانشستر سيتي", continent: "Europe", strength: 96, logo: "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/1200px-Manchester_City_FC_badge.svg.png" },
+            { name: "بايرن ميونخ", continent: "Europe", strength: 94, logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1200px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png" },
+            { name: "برشلونة", continent: "Europe", strength: 92, logo: "https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/1200px-FC_Barcelona_%28crest%29.svg.png" },
+            { name: "ليفربول", continent: "Europe", strength: 91, logo: "https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Liverpool_FC.svg/1200px-Liverpool_FC.svg.png" },
+            { name: "باريس سان جيرمان", continent: "Europe", strength: 90, logo: "https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/1200px-Paris_Saint-Germain_F.C..svg.png" },
+            // آسيا
+            { name: "الهلال السعودي", continent: "Asia", strength: 85, logo: "https://upload.wikimedia.org/wikipedia/en/thumb/0/01/Al-Hilal_FC_logo.svg/1200px-Al-Hilal_FC_logo.svg.png" },
+            { name: "النصر السعودي", continent: "Asia", strength: 84, logo: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Al-Nassr_FC.png" },
+            { name: "السد القطري", continent: "Asia", strength: 80, logo: "https://upload.wikimedia.org/wikipedia/en/thumb/1/12/Al-Sadd_SC_logo.svg/1200px-Al-Sadd_SC_logo.svg.png" },
+            // أفريقيا
+            { name: "الأهلي المصري", continent: "Africa", strength: 83, logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Al_Ahly_SC_logo.svg/1200px-Al_Ahly_SC_logo.svg.png" },
+            { name: "الترجي التونسي", continent: "Africa", strength: 81, logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/b/b3/Logo_Esp%C3%A9rance_sportive_de_Tunis.svg/1200px-Logo_Esp%C3%A9rance_sportive_de_Tunis.svg.png" },
+            { name: "الوداد البيضاوي", continent: "Africa", strength: 80, logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Wydad_Athletic_Club_logo.svg/1200px-Wydad_Athletic_Club_logo.svg.png" },
+            // أمريكا الجنوبية
+            { name: "بالميراس", continent: "South America", strength: 87, logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Palmeiras_logo.svg/1200px-Palmeiras_logo.svg.png" },
+            { name: "فلامينغو", continent: "South America", strength: 86, logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Flamengo_logo.svg/1200px-Flamengo_logo.svg.png" },
+            { name: "ريفر بليت", continent: "South America", strength: 85, logo: "https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/River_Plate_logo.svg/1200px-River_Plate_logo.svg.png" },
+            // أمريكا الشمالية
+            { name: "انتر ميامي", continent: "North America", strength: 82, logo: "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Inter_Miami_CF_logo.svg/1200px-Inter_Miami_CF_logo.svg.png" },
+            { name: "كلوب أمريكا", continent: "North America", strength: 80, logo: "https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Club_Am%C3%A9rica_logo.svg/1200px-Club_Am%C3%A9rica_logo.svg.png" },
+        ];
+        const playerNames = ["راميريز", "سيلفا", "أوليفيرا", "كوستا", "سانتوس", "بيريرا", "رودريغيز", "غوميز", "فيرنانديز", "مارتينيز", "دياز"];
+
+        // --- عناصر الواجهة ---
+        const elements = {
+            setupScreen: document.getElementById('setup-screen'),
+            matchScreen: document.getElementById('match-screen'),
+            team1Select: document.getElementById('team1-select'),
+            team2Select: document.getElementById('team2-select'),
+            startMatchBtn: document.getElementById('start-match-btn'),
+            playAgainBtn: document.getElementById('play-again-btn'),
+            errorMessage: document.getElementById('error-message'),
+            team1Logo: document.getElementById('team1-logo'),
+            team1Name: document.getElementById('team1-name'),
+            team2Logo: document.getElementById('team2-logo'),
+            team2Name: document.getElementById('team2-name'),
+            score: document.getElementById('score'),
+            timer: document.getElementById('match-timer'),
+            events: document.getElementById('match-events'),
+            statsModal: document.getElementById('stats-modal'),
+            closeStatsBtn: document.getElementById('close-stats-btn'),
+            goalSound: document.getElementById('goal-sound'),
+            whistleSound: document.getElementById('whistle-sound'),
+        };
+
+        let matchInterval, matchState;
+
+        // --- وظائف اللعبة ---
+        function populateSelectors() {
+            const continents = { "Europe": "أوروبا", "Asia": "آسيا", "Africa": "أفريقيا", "South America": "أمريكا الجنوبية", "North America": "أمريكا الشمالية" };
+            [elements.team1Select, elements.team2Select].forEach(select => {
+                select.innerHTML = '';
+                for (const continentKey in continents) {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = continents[continentKey];
+                    teams.filter(t => t.continent === continentKey).forEach(team => {
+                        const option = document.createElement('option');
+                        option.value = team.name;
+                        option.textContent = team.name;
+                        optgroup.appendChild(option);
+                    });
+                    select.appendChild(optgroup);
+                }
+            });
+            elements.team2Select.selectedIndex = 1;
+        }
+
+        function getTeamByName(name) { return teams.find(team => team.name === name); }
+        function getRandomPlayer() { return playerNames[Math.floor(Math.random() * playerNames.length)]; }
+
+        function logEvent(minute, message, type = 'info') {
+            const eventElement = document.createElement('p');
+            eventElement.innerHTML = `<strong>'${minute}</strong> ${message}`;
+            eventElement.classList.add(`event-${type}`);
+            elements.events.prepend(eventElement);
+        }
+
+        function updateScoreboard() {
+            elements.score.textContent = `${matchState.score1} - ${matchState.score2}`;
+        }
+        
+        function startMatch() {
+            const team1Name = elements.team1Select.value;
+            const team2Name = elements.team2Select.value;
+
+            if (team1Name === team2Name) {
+                elements.errorMessage.textContent = 'الرجاء اختيار فريقين مختلفين!';
+                return;
+            }
+            elements.errorMessage.textContent = '';
+            
+            elements.setupScreen.classList.remove('active');
+            elements.matchScreen.classList.add('active');
+            elements.playAgainBtn.style.display = 'none';
+
+            const team1 = getTeamByName(team1Name);
+            const team2 = getTeamByName(team2Name);
+
+            matchState = {
+                team1, team2,
+                team1EffStrength: team1.strength * 1.05, // أفضلية الأرض
+                team2EffStrength: team2.strength,
+                minute: 0,
+                score1: 0, score2: 0,
+                isExtraTime: false,
+                stats: {
+                    team1: { possession: 0, shots: 0, fouls: 0, yellow: 0, red: 0 },
+                    team2: { possession: 0, shots: 0, fouls: 0, yellow: 0, red: 0 }
+                }
+            };
+            
+            // تحديث الواجهة
+            elements.team1Logo.src = team1.logo;
+            elements.team1Name.textContent = team1.name;
+            elements.team2Logo.src = team2.logo;
+            elements.team2Name.textContent = team2.name;
+            elements.events.innerHTML = '';
+            updateScoreboard();
+
+            logEvent(0, ` whistle صافرة البداية! انطلقت المباراة بين ${team1.name} و ${team2.name}!`);
+            runSimulation(90);
+        }
+
+        function runSimulation(duration) {
+            elements.startMatchBtn.disabled = true;
+            matchInterval = setInterval(() => {
+                matchState.minute++;
+                elements.timer.textContent = `${matchState.minute}' ${matchState.isExtraTime ? '(و.إ)' : ''}`;
+
+                // محاكاة الحدث
+                simulateMinute();
+
+                if (matchState.minute === (matchState.isExtraTime ? 120 : 90)) {
+                    endPeriod();
+                }
+            }, 80); // سرعة المحاكاة
+        }
+
+        function simulateMinute() {
+            const totalStrength = matchState.team1EffStrength + matchState.team2EffStrength;
+            const attackingTeam = (Math.random() * totalStrength < matchState.team1EffStrength) ? matchState.team1 : matchState.team2;
+            const defendingTeam = (attackingTeam === matchState.team1) ? matchState.team2 : matchState.team1;
+
+            if (attackingTeam === matchState.team1) matchState.stats.team1.possession++;
+            else matchState.stats.team2.possession++;
+
+            const attackChance = totalStrength / 200;
+            if (Math.random() < attackChance) {
+                const attackingEffStrength = (attackingTeam === matchState.team1) ? matchState.team1EffStrength : matchState.team2EffStrength;
+                const defendingEffStrength = (defendingTeam === matchState.team1) ? matchState.team1EffStrength : matchState.team2EffStrength;
+                
+                const goalChance = 0.2 * (attackingEffStrength / defendingEffStrength);
+
+                if (Math.random() < goalChance) { // هدف
+                    if (attackingTeam === matchState.team1) {
+                        matchState.score1++;
+                        matchState.stats.team1.shots++;
+                    } else {
+                        matchState.score2++;
+                        matchState.stats.team2.shots++;
+                    }
+                    logEvent(matchState.minute, `⚽ هدف! ${getRandomPlayer()} يسجل لصالح ${attackingTeam.name}!`, 'goal');
+                    elements.goalSound.play();
+                    updateScoreboard();
+                } else { // حدث آخر
+                    if (attackingTeam === matchState.team1) matchState.stats.team1.shots++;
+                    else matchState.stats.team2.shots++;
+                    
+                    const eventRandom = Math.random();
+                    if (eventRandom < 0.15) { // بطاقة
+                        const cardRandom = Math.random();
+                        if (cardRandom < 0.1) {
+                            logEvent(matchState.minute, `🟥 بطاقة حمراء! ${getRandomPlayer()} من ${defendingTeam.name} يُطرد!`, 'card-red');
+                            if (defendingTeam === matchState.team1) matchState.stats.team1.red++; else matchState.stats.team2.red++;
+                        } else {
+                            logEvent(matchState.minute, `🟨 بطاقة صفراء للاعب ${getRandomPlayer()} من ${defendingTeam.name}.`, 'card-yellow');
+                            if (defendingTeam === matchState.team1) matchState.stats.team1.yellow++; else matchState.stats.team2.yellow++;
+                        }
+                        if (defendingTeam === matchState.team1) matchState.stats.team1.fouls++; else matchState.stats.team2.fouls++;
+                    }
+                }
+            }
+        }
+
+        function endPeriod() {
+            clearInterval(matchInterval);
+            if (matchState.score1 === matchState.score2) {
+                if (!matchState.isExtraTime) {
+                    matchState.isExtraTime = true;
+                    logEvent(90, `نهاية الوقت الأصلي بالتعادل. المباراة تتجه إلى الوقت الإضافي!`, 'info');
+                    runSimulation(120);
+                } else {
+                    logEvent(120, `نهاية الوقت الإضافي وما زال التعادل قائمًا! ننتقل إلى ركلات الترجيح!`, 'info');
+                    simulatePenalties();
+                }
+            } else {
+                endMatch();
+            }
+        }
+        
+        function simulatePenalties() {
+            let penScore1 = 0, penScore2 = 0;
+            let kicks = 0;
+            
+            const runPenaltyKick = () => {
+                if (kicks < 10) {
+                    const isTeam1Kick = kicks % 2 === 0;
+                    const team = isTeam1Kick ? matchState.team1 : matchState.team2;
+                    const chance = 0.75 * (team.strength / 100) + 0.1;
+                    
+                    setTimeout(() => {
+                        if (Math.random() < chance) {
+                            logEvent('P', `⚽ هدف من ركلة ترجيح لفريق ${team.name}!`, 'goal');
+                            if (isTeam1Kick) penScore1++; else penScore2++;
+                        } else {
+                            logEvent('P', `❌ إهدار ركلة ترجيح من فريق ${team.name}!`, 'chance');
+                        }
+                        matchState.score1 = penScore1;
+                        matchState.score2 = penScore2;
+                        updateScoreboard();
+                        
+                        kicks++;
+                        runPenaltyKick();
+                    }, 1000); // تأخير بين الركلات
+                } else {
+                    // Sudden Death if still tied
+                    if (penScore1 === penScore2) {
+                        logEvent('P', `التعادل مستمر، ننتقل إلى الركلة بركلة (الموت المفاجئ)!`, 'info');
+                        runPenaltyKick(); // Continue kicking one by one
+                    } else {
+                       endMatch(true); // isPenalties = true
+                    }
+                }
+            };
+            runPenaltyKick();
+        }
+
+        function endMatch(isPenalties = false) {
+            elements.whistleSound.play();
+            const { team1, team2, score1, score2 } = matchState;
+            let resultMessage = `نهاية المباراة!`;
+            if (isPenalties) {
+                resultMessage += ` ${score1 > score2 ? team1.name : team2.name} يفوز بركلات الترجيح ${score1} - ${score2}!`;
+            } else {
+                 if (score1 > score2) resultMessage += ` ${team1.name} يفوز على ${team2.name} بنتيجة ${score1} - ${score2}.`;
+                 else if (score2 > score1) resultMessage += ` ${team2.name} يفوز على ${team1.name} بنتيجة ${score2} - ${score1}.`;
+            }
+            
+            logEvent('END', resultMessage, 'info');
+            elements.timer.textContent = "Full Time";
+            elements.playAgainBtn.style.display = 'block';
+            elements.startMatchBtn.disabled = false;
+            showFinalStats();
+        }
+        
+        function showFinalStats() {
+            const { team1, team2, score1, score2, stats } = matchState;
+            const totalPossession = stats.team1.possession + stats.team2.possession;
+
+            document.getElementById('final-result').innerHTML = `<h3>${team1.name} ${score1} - ${score2} ${team2.name}</h3>`;
+            
+            document.getElementById('stats-team1-name').textContent = team1.name;
+            document.getElementById('stats-team2-name').textContent = team2.name;
+
+            document.getElementById('stats-possession1').textContent = `${Math.round((stats.team1.possession / totalPossession) * 100)}%`;
+            document.getElementById('stats-possession2').textContent = `${Math.round((stats.team2.possession / totalPossession) * 100)}%`;
+            
+            document.getElementById('stats-goals1').textContent = score1;
+            document.getElementById('stats-goals2').textContent = score2;
+            
+            document.getElementById('stats-shots1').textContent = stats.team1.shots;
+            document.getElementById('stats-shots2').textContent = stats.team2.shots;
+
+            document.getElementById('stats-fouls1').textContent = stats.team1.fouls;
+            document.getElementById('stats-fouls2').textContent = stats.team2.fouls;
+            
+            document.getElementById('stats-yellow1').textContent = stats.team1.yellow;
+            document.getElementById('stats-yellow2').textContent = stats.team2.yellow;
+
+            document.getElementById('stats-red1').textContent = stats.team1.red;
+            document.getElementById('stats-red2').textContent = stats.team2.red;
+
+            elements.statsModal.style.display = 'flex';
+        }
+
+        function resetGame() {
+            elements.matchScreen.classList.remove('active');
+            elements.setupScreen.classList.add('active');
+            elements.statsModal.style.display = 'none';
+        }
+
+        // --- ربط الأحداث ---
+        elements.startMatchBtn.addEventListener('click', startMatch);
+        elements.playAgainBtn.addEventListener('click', resetGame);
+        elements.closeStatsBtn.addEventListener('click', () => elements.statsModal.style.display = 'none');
+        
+        // --- بدء اللعبة ---
+        populateSelectors();
+    });
+    </script>
 </body>
 </html>
